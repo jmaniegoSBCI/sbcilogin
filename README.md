@@ -49,6 +49,25 @@ Visit `http://127.0.0.1:8000`. The administrator sign-in link is in the footer. 
 
 The `DatabaseSeeder` creates an administrator only when both `ADMIN_EMAIL` and `ADMIN_PASSWORD` are set. It does not create a public/default admin credential. Keep the SQLite database until you have verified the migrated account counts and can log in against MongoDB.
 
+## Deploy to Vercel
+
+This project uses the maintained [`vercel-community/php`](https://github.com/vercel-community/php) runtime. The configuration pins `vercel-php@0.9.0`, which provides PHP 8.5; the project requires PHP `^8.2`, and Laravel 12 and the MongoDB Laravel integration support that PHP version. The runtime includes the MongoDB PHP extension.
+
+1. Push this project to GitHub and import its repository in Vercel. Keep the project root set to this directory (the one containing `composer.json` and `vercel.json`).
+2. In the Vercel project's **Settings → Environment Variables**, configure:
+   - `APP_KEY`: the production key generated with `php artisan key:generate --show`. Do not reuse a development key or commit it.
+   - `APP_URL`: the production Vercel domain.
+   - `DB_CONNECTION`: `mongodb`.
+   - `MONGODB_DATABASE`: `sbcilogin`.
+   - `MONGODB_URI`: the MongoDB connection URI for the production database.
+   - `MONGODB_AUTH_SOURCE`: usually `admin` for Atlas.
+   - `ADMIN_EMAIL` and `ADMIN_PASSWORD`: set these if you will seed or update an administrator.
+3. In MongoDB Atlas, allow network access from Vercel (or use an appropriate Atlas network access configuration for your deployment), and ensure the database user's credentials in `MONGODB_URI` are valid. Keep all credentials in Vercel's environment settings, not in Git.
+4. Before sending traffic to the deployment, run `php artisan migrate --force` and `php artisan db:seed --force` against the production MongoDB database from a trusted machine with the production variables configured. Verify the database connection and administrator login.
+5. Deploy from Vercel. The PHP entry point forwards application requests to Laravel and serves safe static assets from `public`; serverless-safe session, cache, compiled-view, and log settings are included in `vercel.json`.
+
+Vercel's filesystem is ephemeral, so this deployment uses secure, encrypted cookie sessions and in-memory cache rather than relying on local session/cache files. No Docker installation or container configuration is needed; Vercel runs the PHP function using the configured runtime. The application database must be a persistent MongoDB service; do not use SQLite as the production database. The first Vercel deployment cannot complete sign-in or migration until the MongoDB URI, credentials, and network access are correct.
+
 ## Portal behavior
 
 - Student registration accepts an email and password; profile details are required immediately after the first successful login.
