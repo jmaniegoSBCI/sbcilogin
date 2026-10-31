@@ -51,9 +51,9 @@ The `DatabaseSeeder` creates an administrator only when both `ADMIN_EMAIL` and `
 
 ## Deploy to Vercel
 
-This project uses the maintained [`vercel-community/php`](https://github.com/vercel-community/php) runtime. The configuration pins `vercel-php@0.9.0`, which provides PHP 8.5; the project requires PHP `^8.2`, and Laravel 12 and the MongoDB Laravel integration support that PHP version. The runtime includes the MongoDB PHP extension.
+This project uses the maintained [`vercel-community/php`](https://github.com/vercel-community/php) runtime. The configuration pins `vercel-php@0.9.0`, which provides PHP 8.5; the project requires PHP `^8.2`, and Laravel 12 and the MongoDB Laravel integration support that PHP version. The runtime includes the MongoDB PHP extension. Vercel is explicitly set to the **Other** framework preset, skips the Vite build (this app serves its CSS directly from `public/css`), and uses `public` rather than the Vite default `dist` output directory.
 
-1. Push this project to GitHub and import its repository in Vercel. Keep the project root set to this directory (the one containing `composer.json` and `vercel.json`).
+1. Push this project to GitHub and import its repository in Vercel. Keep the project root set to this directory (the one containing `composer.json` and `vercel.json`). The checked-in Vercel config sets the framework preset and output directory; if you previously changed these in the dashboard, redeploy so the configuration is applied.
 2. In the Vercel project's **Settings → Environment Variables**, configure:
    - `APP_KEY`: the production key generated with `php artisan key:generate --show`. Do not reuse a development key or commit it.
    - `APP_URL`: the production Vercel domain.
