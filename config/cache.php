@@ -32,7 +32,13 @@ return [
     |
     */
 
-    'stores' => [
+    'stores' => ['mongodb' => [
+            'driver' => 'mongodb',
+            'connection' => 'mongodb',
+            'collection' => 'cache',
+            'lock_connection' => 'mongodb',
+            'lock_collection' => 'cache_locks',
+        ],
 
         'array' => [
             'driver' => 'array',
