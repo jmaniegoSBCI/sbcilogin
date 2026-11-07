@@ -56,7 +56,7 @@ This project uses the maintained [`vercel-community/php`](https://github.com/ver
 1. Push this project to GitHub and import its repository in Vercel. Keep the project root set to this directory (the one containing `composer.json` and `vercel.json`). The checked-in Vercel config sets the framework preset and output directory; if you previously changed these in the dashboard, redeploy so the configuration is applied.
 2. In the Vercel project's **Settings → Environment Variables**, configure:
    - `APP_KEY`: the production key generated with `php artisan key:generate --show`. Do not reuse a development key or commit it.
-   - `APP_URL`: the production Vercel domain.
+   - `APP_URL`: the production Vercel URL, including `https://` (for example, `https://your-project.vercel.app`).
    - `DB_CONNECTION`: `mongodb`.
    - `MONGODB_DATABASE`: `sbcilogin`.
    - `MONGODB_URI`: the MongoDB connection URI for the production database.
