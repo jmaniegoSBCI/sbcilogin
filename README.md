@@ -51,9 +51,9 @@ The `DatabaseSeeder` creates an administrator only when both `ADMIN_EMAIL` and `
 
 ## Deploy to Vercel
 
-This project uses the maintained [`vercel-community/php`](https://github.com/vercel-community/php) runtime. The configuration pins `vercel-php@0.9.0`, which provides PHP 8.5; the project requires PHP `^8.2`, and Laravel 12 and the MongoDB Laravel integration support that PHP version. The runtime includes the MongoDB PHP extension. Vercel is explicitly set to the **Other** framework preset, skips the Vite build (this app serves its CSS directly from `public/css`), and uses `public` rather than the Vite default `dist` output directory.
+Vercel builds this project with [`Dockerfile.vercel`](./Dockerfile.vercel), using FrankenPHP on PHP 8.2, the MongoDB extension, and compiled Vite assets. You do not need to install or run Docker on your computer; Vercel performs the container build. Composer downloads are limited to four concurrent HTTP requests and retried up to three times to tolerate temporary package-host errors such as GitHub HTTP 5xx responses.
 
-1. Push this project to GitHub and import its repository in Vercel. Keep the project root set to this directory (the one containing `composer.json` and `vercel.json`). The checked-in Vercel config sets the framework preset and output directory; if you previously changed these in the dashboard, redeploy so the configuration is applied.
+1. Push this project to GitHub and import its repository in Vercel. Keep the project root set to this directory (the one containing `composer.json` and `Dockerfile.vercel`). The checked-in Vercel config selects the Container framework, which builds with `Dockerfile.vercel`.
 2. In the Vercel project's **Settings → Environment Variables**, configure:
    - `APP_KEY`: the production key generated with `php artisan key:generate --show`. Do not reuse a development key or commit it.
    - `APP_URL`: the production Vercel URL, including `https://` (for example, `https://your-project.vercel.app`).
@@ -61,12 +61,15 @@ This project uses the maintained [`vercel-community/php`](https://github.com/ver
    - `MONGODB_DATABASE`: `sbcilogin`.
    - `MONGODB_URI`: the MongoDB connection URI for the production database.
    - `MONGODB_AUTH_SOURCE`: usually `admin` for Atlas.
+   - `SESSION_DRIVER`: `mongodb`.
+   - `SESSION_CONNECTION`: `mongodb`.
+   - `CACHE_STORE`: `mongodb`.
    - `ADMIN_EMAIL` and `ADMIN_PASSWORD`: set these if you will seed or update an administrator.
 3. In MongoDB Atlas, allow network access from Vercel (or use an appropriate Atlas network access configuration for your deployment), and ensure the database user's credentials in `MONGODB_URI` are valid. Keep all credentials in Vercel's environment settings, not in Git.
 4. Before sending traffic to the deployment, run `php artisan migrate --force` and `php artisan db:seed --force` against the production MongoDB database from a trusted machine with the production variables configured. Verify the database connection and administrator login.
-5. Deploy from Vercel. The PHP entry point forwards application requests to Laravel and serves safe static assets from `public`; serverless-safe session, cache, compiled-view, and log settings are included in `vercel.json`.
+5. Deploy from Vercel. Vercel builds the container and serves the Laravel app with FrankenPHP; the Dockerfile builds the Vite assets and installs the production PHP dependencies.
 
-Vercel's filesystem is ephemeral, so this deployment uses secure, encrypted cookie sessions and in-memory cache rather than relying on local session/cache files. No Docker installation or container configuration is needed; Vercel runs the PHP function using the configured runtime. The application database must be a persistent MongoDB service; do not use SQLite as the production database. The first Vercel deployment cannot complete sign-in or migration until the MongoDB URI, credentials, and network access are correct.
+Vercel's container filesystem is ephemeral, so sessions and cache use MongoDB rather than local files. No Docker installation is needed on your computer; Vercel builds the configured container. The application database must be a persistent MongoDB service; do not use SQLite as the production database. The first Vercel deployment cannot complete sign-in or migration until the MongoDB URI, credentials, and network access are correct.
 
 ## Portal behavior
 

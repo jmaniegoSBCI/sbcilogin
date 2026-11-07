@@ -28,13 +28,20 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copy Laravel application
 COPY . .
 
-# Install production PHP dependencies
-RUN composer install \
-    --no-dev \
-    --no-interaction \
-    --no-progress \
-    --prefer-dist \
-    --optimize-autoloader
+# Install production PHP dependencies, retrying transient package-host failures.
+RUN attempt=1; \
+    until COMPOSER_MAX_PARALLEL_HTTP=4 composer install \
+        --no-dev \
+        --no-interaction \
+        --no-progress \
+        --prefer-dist \
+        --optimize-autoloader; do \
+        status=$?; \
+        if [ "$attempt" -ge 3 ]; then exit "$status"; fi; \
+        echo "Composer install failed (attempt ${attempt}/3); retrying in 10 seconds..." >&2; \
+        attempt=$((attempt + 1)); \
+        sleep 10; \
+    done
 
 # Copy compiled Vite assets
 COPY --from=frontend /app/public/build ./public/build
